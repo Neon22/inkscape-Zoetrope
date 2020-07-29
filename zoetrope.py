@@ -1,5 +1,4 @@
-#! /usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python3
 '''
 Zoetrope maker.
 - prints disk of given diameter and number of images around the outside.
@@ -13,7 +12,6 @@ MIT license
 '''
 
 import inkex       # Required
-import simplestyle # will be needed here for styles support
 from lxml import etree
 
 from math import cos, sin, radians, pi
@@ -37,91 +35,31 @@ def draw_SVG_circle(parent, r, cx, cy, name, style):
                     inkex.addNS('label','inkscape'): name}
     circle = etree.SubElement(parent, inkex.addNS('circle','svg'), circ_attribs )
 
-
 Black = '#000000'
-
 
 class Zoetrope(inkex.Effect): 
     
     def __init__(self):
-        " define how the options are mapped from the inx file "
         inkex.Effect.__init__(self) # initialize the super class
-
-        # Define your list of parameters defined in the .inx file
-        self.arg_parser.add_argument("-u", "--units",
-                                     action="store", type=str,
-                                     dest="units", default='mm',
-                                     help="Units this dialog is using")
-
-        self.arg_parser.add_argument("-d", "--diameter",
-                                     action="store", type=float,
-                                     dest="diameter", default=1.0,
-                                     help="Diameter of disk")
-
-        self.arg_parser.add_argument("-n", "--divisions",
-                                     action="store", type=int,
-                                     dest="divisions", default=24,
-                                     help="Number of divisions")
-
-        self.arg_parser.add_argument("-i", "--height",
-                                     action="store", type=float,
-                                     dest="height", default=1.0,
-                                     help="Image height")
-
-        self.arg_parser.add_argument("-t", "--trigger",
-                                     action="store", type=inkex.Boolean, 
-                                     dest="trigger", default=False,
-                                     help="Trigger")
-
-        self.arg_parser.add_argument("-q", "--triggerradius",
-                                     action="store", type=float,
-                                     dest="triggerradius", default=1.0,
-                                     help="Height of trigger line")
-
-        self.arg_parser.add_argument("-e", "--thick",
-                                     action="store", type=float,
-                                     dest="thick", default=1.0,
-                                     help="Thickness of trigger line")
-
-        self.arg_parser.add_argument("-r", "--ratio",
-                                     action="store", type=float,
-                                     dest="ratio", default=0.5,
-                                     help="Ratio of trigger pulse")
-
-        self.arg_parser.add_argument("-p", "--phase",
-                                     action="store", type=float,
-                                     dest="phase", default=0,
-                                     help="Delay of trigger pulse")
-                                     
-        self.arg_parser.add_argument("-w", "--stroke_width",
-                                     action="store", type=float,
-                                     dest="stroke_width", default=0.1,
-                                     help="Line thickness")
-
-        self.arg_parser.add_argument("-m", "--template",
-                                     action="store", type=inkex.Boolean, 
-                                     dest="template", default=False,
-                                     help="Show Image Distortion template")
-
-        self.arg_parser.add_argument("-k", "--dpi",
-                                     action="store", type=int,
-                                     dest="dpi", default=300,
-                                     help="To calculate useful image size")
-
-        # here so we can have tabs - but we do not use it directly - else error
-        self.arg_parser.add_argument("--active-tab",
-                                     action="store", type=str,
-                                     dest="active_tab", default='',
-                                     help="Active tab. Not used now.")
-        
-    def getUnittouu(self, param):
-        return self.svg.unittouu(param)
-    
+        self.arg_parser.add_argument("-u", "--units", default='mm', help="Units this dialog is using")
+        self.arg_parser.add_argument("-d", "--diameter", type=float, default=1.0, help="Diameter of disk")
+        self.arg_parser.add_argument("-n", "--divisions", type=int, default=24, help="Number of divisions")
+        self.arg_parser.add_argument("-i", "--height", type=float, default=1.0, help="Image height")
+        self.arg_parser.add_argument("-t", "--trigger", type=inkex.Boolean, default=False, help="Trigger")
+        self.arg_parser.add_argument("-q", "--triggerradius", type=float, default=1.0, help="Height of trigger line")
+        self.arg_parser.add_argument("-e", "--thick", type=float, default=1.0, help="Thickness of trigger line")
+        self.arg_parser.add_argument("-r", "--ratio", type=float, default=0.5, help="Ratio of trigger pulse")
+        self.arg_parser.add_argument("-p", "--phase", type=float, default=0, help="Delay of trigger pulse")
+        self.arg_parser.add_argument("-w", "--stroke_width", type=float, default=0.1, help="Line thickness")
+        self.arg_parser.add_argument("-m", "--template", type=inkex.Boolean,  default=False, help="Show Image Distortion template")
+        self.arg_parser.add_argument("-k", "--dpi", type=int, default=300, help="To calculate useful image size")
+        self.arg_parser.add_argument("--active-tab", default='', help="Active tab. Not used now.")
+ 
     def calc_unit_factor(self):
         """ return the scale factor for all dimension conversions.
             - Everything in inkscape is expected to be in 90dpi pixel units
         """
-        unit_factor = self.getUnittouu(str(1.0) + self.options.units)
+        unit_factor = self.svg.unittouu(str(1.0) + self.options.units)
         return unit_factor
 
     def polar_to_cartesian(self, cx, cy, radius, angle):
@@ -287,7 +225,7 @@ class Zoetrope(inkex.Effect):
             template_sq = etree.SubElement(templategroup, 'rect', attr)
             # suggested sizes
             # image_height is in 90dpi pixels
-            dpi_factor = self.getUnittouu('1in')/float(self.options.dpi)
+            dpi_factor = self.svg.unittouu('1in')/float(self.options.dpi)
             h = int(image_height / float(dpi_factor))
             w = int(h*image_ratio)
             text_atts = {'style':str(inkex.Style(text_style)),
