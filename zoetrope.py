@@ -7,7 +7,7 @@ Also includes a pulse trigger ring to trigger a strobe.
 Prints a distorted and undistorted image reference sizes
 -  for use in a paint program to distort the source inages to fit onto the Disk.
 
-Neon22 - github 2016
+Neon22 - github 2016/2020
 MIT license
 '''
 
@@ -73,10 +73,10 @@ class Zoetrope(inkex.Effect):
         # Not using internal arc rep - instead construct path A in svg style directly
         # so we can append lines to make single path
         start = self.polar_to_cartesian(x, y, radius, end_angle)
-        end = self.polar_to_cartesian(x, y, radius, start_angle)
+        end   = self.polar_to_cartesian(x, y, radius, start_angle)
         arc_flag = 0 if reverse else 1
-        sweep = 0 if (end_angle-start_angle) <=180 else 1
-        path = 'M %s,%s' % (start[0], start[1])
+        sweep    = 0 if (end_angle-start_angle) <=180 else 1
+        path  = 'M %s,%s' % (start[0], start[1])
         path += " A %s,%s 0 %d %d %s %s" % (radius, radius, sweep, arc_flag, end[0], end[1])
         return path
     
@@ -102,13 +102,12 @@ class Zoetrope(inkex.Effect):
             - Show trigger pulse ring, distortion and image templates
         """
         # convert import options
-        unit_factor = self.calc_unit_factor()
-        path_stroke_width = self.options.stroke_width * unit_factor
-        diameter = self.options.diameter * unit_factor
+        path_stroke_width = self.svg.unittouu(str(self.options.stroke_width)+self.options.units)
+        diameter = self.svg.unittouu(str(self.options.diameter)+self.options.units)
         divisions = self.options.divisions 
-        image_height = self.options.height * unit_factor
-        triggerradius = self.options.triggerradius * unit_factor
-        thick = self.options.thick * unit_factor
+        image_height = self.svg.unittouu(str(self.options.height)+self.options.units)
+        triggerradius = self.svg.unittouu(str(self.options.triggerradius)+self.options.units)
+        thick = self.svg.unittouu(str(self.options.thick)+self.options.units)
         cross = diameter/50
         
         # This finds center of current view in inkscape
@@ -177,8 +176,8 @@ class Zoetrope(inkex.Effect):
             draw_SVG_circle(pulsegroup, triggerradius + thick, 0, 0, 'trigger_ring', line_style)
         
         # text Label
-        font_height = min(32, max( 8, int(diameter/50.0)))
-        text_style = { 'font-size': str(font_height),
+        font_height = 4 #min(14, max( 8, int(diameter/100.0)))
+        text_style = { 'font-size': str(font_height)+'pt',
                        'font-family': 'sans-serif',
                        'text-anchor': 'middle',
                        'text-align': 'center',
